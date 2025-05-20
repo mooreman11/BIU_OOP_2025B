@@ -1,5 +1,5 @@
 /**
- * This class does some simple tessting of the Point and Line classes.
+ * This class does some simple testing of the Point and Line classes.
  */
 public class GeometryTester {
 
