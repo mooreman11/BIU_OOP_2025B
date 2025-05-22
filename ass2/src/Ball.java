@@ -99,7 +99,50 @@ public class Ball {
     public void moveOneStep() {
         this.center = this.getVelocity().applyToPoint(this.center);
     }
-    public void moveOneStep(Bound[] bounds) {
-        this.center = this.getVelocity().applyToPoint(this.center);
+
+    /**
+     * @param bounds an array of bounds which balls must change their trajectory upon collision
+     * Moves the ball one step, considering collisions with the game environment.
+     */
+    public void moveOneStep(Rectangle[] bounds) {
+        double dx = this.velocity.getDx();
+        double dy = this.velocity.getDy();
+        double nextX = this.center.getX() + dx;
+        double nextY = this.center.getY() + dy;
+
+        for (Rectangle bound : bounds) {
+            boolean collided = false;
+
+            // Check horizontal collisions
+            if (nextX - this.r < bound.getXLowerBound()) {
+                nextX = bound.getXLowerBound() + this.r;
+                dx = -dx; // Reverse horizontal velocity
+                collided = true;
+            } else if (nextX + this.r > bound.getXUpperBound()) {
+                nextX = bound.getXUpperBound() - this.r;
+                dx = -dx;
+                collided = true;
+            }
+
+            // Check vertical collisions
+            if (nextY - this.r < bound.getYLowerBound()) {
+                nextY = bound.getYLowerBound() + this.r;
+                dy = -dy; // Reverse vertical velocity
+                collided = true;
+            } else if (nextY + this.r > bound.getYUpperBound()) {
+                nextY = bound.getYUpperBound() - this.r;
+                dy = -dy;
+                collided = true;
+            }
+
+            // Exit loop if a collision is detected
+            if (collided) {
+                break;
+            }
+        }
+
+        // Update position and velocity after resolving collisions
+        this.center = new Point(nextX, nextY);
+        this.velocity = new Velocity(dx, dy);
     }
 }

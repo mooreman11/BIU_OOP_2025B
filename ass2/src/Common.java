@@ -1,5 +1,5 @@
-/*
-    Class for shared core and common functionality
+/**
+ *  Class for shared core and common functionality
  */
 public class Common {
     static final double THRESHOLD = 0.00001d;
