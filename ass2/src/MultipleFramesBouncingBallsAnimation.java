@@ -56,7 +56,7 @@ public class MultipleFramesBouncingBallsAnimation {
                 do {
                     x = r + rand.nextInt(WINDOW_WIDTH - 2 * r);
                     y = r + rand.nextInt(WINDOW_HEIGHT - 2 * r);
-                } while (!grayFrame.contains(new Point(x, y)) && !yellowFrame.contains(new Point(x, y)));
+                } while (grayFrame.contains(new Point(x, y)) && yellowFrame.contains(new Point(x, y)));
             }
 
             Ball b = new Ball(x, y, r,

@@ -4,7 +4,7 @@ public class Ball {
     private Point center;
     private final int r;
     private final java.awt.Color color;
-    public Velocity velocity;
+    private Velocity velocity;
 
     /**
      * Constructor to initialize a Ball with a specific center point, radius,
