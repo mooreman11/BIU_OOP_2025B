@@ -5,8 +5,6 @@ import biuoop.DrawSurface;
 import biuoop.GUI;
 import biuoop.Sleeper;
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 /**
@@ -26,10 +24,10 @@ public class MultipleFramesBouncingBallsAnimation {
     private static final int GRAY_HEIGHT = 450;
 
     // Yellow frame (450,450) to (600,600)
-    private static final int YEL_X = 450;
-    private static final int YEL_Y = 450;
-    private static final int YEL_WIDTH = 150;
-    private static final int YEL_HEIGHT = 150;
+    private static final int YELLOW_X = 450;
+    private static final int YELLOW_Y = 450;
+    private static final int YELLOW_WIDTH = 150;
+    private static final int YELLOW_HEIGHT = 150;
 
     /**
      * Generates balls: first half inside the gray frame, second half anywhere
@@ -39,7 +37,7 @@ public class MultipleFramesBouncingBallsAnimation {
         Random rand = new Random();
         Ball[] balls = new Ball[sizes.length];
         Rectangle grayFrame = new Rectangle(new Point(GRAY_X, GRAY_Y), GRAY_WIDTH, GRAY_HEIGHT);
-        Rectangle yellowFrame = new Rectangle(new Point(YEL_X, YEL_Y), YEL_WIDTH, YEL_HEIGHT);
+        Rectangle yellowFrame = new Rectangle(new Point(YELLOW_X, YELLOW_Y), YELLOW_WIDTH, YELLOW_HEIGHT);
 
         int half = (sizes.length + 1) / 2;   // extra goes into gray if odd
 
@@ -49,14 +47,14 @@ public class MultipleFramesBouncingBallsAnimation {
 
             if (i < half) {
                 // Place inside gray frame
-                x = GRAY_X + r + rand.nextInt(GRAY_WIDTH - 2 * r);
-                y = GRAY_Y + r + rand.nextInt(GRAY_HEIGHT - 2 * r);
+                x = GRAY_X + r + rand.nextInt(Math.max(1, GRAY_WIDTH - 2 * r));
+                y = GRAY_Y + r + rand.nextInt(Math.max(1, GRAY_HEIGHT - 2 * r));
             } else {
-                //generate outside gray and yellow frames
+                // Generate outside BOTH gray and yellow frames - FIX: use OR instead of AND
                 do {
-                    x = r + rand.nextInt(WINDOW_WIDTH - 2 * r);
-                    y = r + rand.nextInt(WINDOW_HEIGHT - 2 * r);
-                } while (!grayFrame.contains(new Point(x, y)) && !yellowFrame.contains(new Point(x, y)));
+                    x = r + rand.nextInt(Math.max(1, WINDOW_WIDTH - 2 * r));
+                    y = r + rand.nextInt(Math.max(1, WINDOW_HEIGHT - 2 * r));
+                } while (grayFrame.contains(new Point(x, y)) || yellowFrame.contains(new Point(x, y)));
             }
 
             Ball b = new Ball(x, y, r,
@@ -64,10 +62,65 @@ public class MultipleFramesBouncingBallsAnimation {
             // Give it a small random velocity
             int dx = rand.nextInt(5) + 1;
             int dy = rand.nextInt(5) + 1;
+            if (rand.nextBoolean()) dx = -dx;
+            if (rand.nextBoolean()) dy = -dy;
             b.setVelocity(new Velocity(dx, dy));
             balls[i] = b;
         }
         return balls;
+    }
+
+    /**
+     * Manually handle collision for balls that need to bounce off rectangles from outside
+     */
+    private static void handleOutsideBounce(Ball ball, Rectangle rect) {
+        double ballX = ball.getX();
+        double ballY = ball.getY();
+        // Get radius from area (getSize returns area)
+        int radius = (int)Math.sqrt(ball.getSize() / Math.PI);
+
+        double dx = ball.getVelocity().getDx();
+        double dy = ball.getVelocity().getDy();
+
+        double nextX = ballX + dx;
+        double nextY = ballY + dy;
+
+        // Check if ball would collide with rectangle from outside
+        boolean willCollide = false;
+
+        // Left side collision
+        if (ballX + radius <= rect.getXLowerBound() && nextX + radius > rect.getXLowerBound()) {
+            if (ballY + radius > rect.getYLowerBound() && ballY - radius < rect.getYUpperBound()) {
+                dx = -Math.abs(dx);
+                willCollide = true;
+            }
+        }
+        // Right side collision
+        else if (ballX - radius >= rect.getXUpperBound() && nextX - radius < rect.getXUpperBound()) {
+            if (ballY + radius > rect.getYLowerBound() && ballY - radius < rect.getYUpperBound()) {
+                dx = Math.abs(dx);
+                willCollide = true;
+            }
+        }
+
+        // Top side collision
+        if (ballY - radius >= rect.getYUpperBound() && nextY - radius < rect.getYUpperBound()) {
+            if (ballX + radius > rect.getXLowerBound() && ballX - radius < rect.getXUpperBound()) {
+                dy = Math.abs(dy);
+                willCollide = true;
+            }
+        }
+        // Bottom side collision
+        else if (ballY + radius <= rect.getYLowerBound() && nextY + radius > rect.getYLowerBound()) {
+            if (ballX + radius > rect.getXLowerBound() && ballX - radius < rect.getXUpperBound()) {
+                dy = -Math.abs(dy);
+                willCollide = true;
+            }
+        }
+
+        if (willCollide) {
+            ball.setVelocity(new Velocity(dx, dy));
+        }
     }
 
     /**
@@ -81,7 +134,7 @@ public class MultipleFramesBouncingBallsAnimation {
 
         // Prepare our frames
         Rectangle grayFrame = new Rectangle(new Point(GRAY_X, GRAY_Y), GRAY_WIDTH, GRAY_HEIGHT, Color.GRAY);
-        Rectangle yellowFrame = new Rectangle(new Point(YEL_X, YEL_Y), YEL_WIDTH, YEL_HEIGHT, Color.YELLOW);
+        Rectangle yellowFrame = new Rectangle(new Point(YELLOW_X, YELLOW_Y), YELLOW_WIDTH, YELLOW_HEIGHT, Color.YELLOW);
         Rectangle windowBorder = new Rectangle(new Point(0, 0), WINDOW_WIDTH, WINDOW_HEIGHT);
 
         int half = (balls.length + 1) / 2;
@@ -90,24 +143,23 @@ public class MultipleFramesBouncingBallsAnimation {
             DrawSurface d = gui.getDrawSurface();
             // Draw frames
             grayFrame.drawOn(d);
-            yellowFrame.drawOn(d);
 
             for (int i = 0; i < balls.length; i++) {
                 Ball b = balls[i];
 
-                // Decide which set of bounds to use
-                List<Rectangle> bounds = new ArrayList<>();
                 if (i < half) {
-                    // first half → only gray
-                    bounds.add(grayFrame);
+                    // First half - bounce inside gray frame only
+                    b.moveOneStep(new Rectangle[]{grayFrame});
                 } else {
-                    // second half → window + gray + yellow
-                    bounds.add(windowBorder);
-                    bounds.add(grayFrame);
-                    bounds.add(yellowFrame);
-                }
+                    // Second half - handle collisions manually
+                    // First check collisions with frames from outside
+                    handleOutsideBounce(b, grayFrame);
+                    handleOutsideBounce(b, yellowFrame);
 
-                b.moveOneStep(bounds.toArray(new Rectangle[0]));
+                    // Then move within window bounds
+                    b.moveOneStep(new Rectangle[]{windowBorder});
+                }
+                yellowFrame.drawOn(d);
                 b.drawOn(d);
             }
 
@@ -115,6 +167,7 @@ public class MultipleFramesBouncingBallsAnimation {
             sleeper.sleepFor(50);
         }
     }
+
     public static void main(String[] args) {
         if (args.length == 0) {
             System.err.println("Please provide ball sizes as arguments");

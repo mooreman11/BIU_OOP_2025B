@@ -50,14 +50,13 @@ public class MultipleBouncingBallsAnimation {
 
         Rectangle outerBound = new Rectangle(new Point(0, 0), X_BOUND, Y_BOUND);
 
-        Rectangle[] bounds = {outerBound};
         // Main animation loop
         while (true) {
             // Get the drawing surface
             DrawSurface d = gui.getDrawSurface();
             // Move each ball one step and draw it
             for (int i = 0; i < balls.length; i++) {
-                balls[i].moveOneStep(bounds);
+                balls[i].moveOneStep(new Rectangle[]{outerBound}, new Rectangle[]{});
                 balls[i].drawOn(d);
             }
             // Show the updated surface with all the balls
