@@ -15,16 +15,24 @@ public class Paddle implements Sprite, Collidable {
         this.GUI_WIDTH = GUI_WIDTH;
     }
 
-    public void moveLeft(){
-        double x = paddle.getUpperLeft().getX() - STEP >= 0 ? paddle.getUpperLeft().getX() - STEP :
-                GUI_WIDTH - (paddle.getUpperLeft().getX() + STEP % GUI_WIDTH);
-        paddle.setUpperLeft(new Point(x, paddle.getUpperLeft().getY()));
+    public void moveLeft() {
+        double currentX = paddle.getUpperLeft().getX();
+        double newX = currentX - STEP;
+        double leftBound = 15;
+        if (newX < leftBound) {
+            newX = leftBound;
+        }
+        paddle.setUpperLeft(new Point(newX, paddle.getUpperLeft().getY()));
     }
 
-    public void moveRight(){
-        double x = paddle.getUpperLeft().getX() + STEP <= GUI_WIDTH ? paddle.getUpperLeft().getX() + STEP :
-                (paddle.getUpperLeft().getX() + STEP) % GUI_WIDTH;
-        paddle.setUpperLeft(new Point(x, paddle.getUpperLeft().getY()));
+    public void moveRight() {
+        double currentX = paddle.getUpperLeft().getX();
+        double newX = currentX + STEP;
+        double rightBound = GUI_WIDTH - 15 - paddle.getWidth();
+        if (newX > rightBound) {
+            newX = rightBound;
+        }
+        paddle.setUpperLeft(new Point(newX, paddle.getUpperLeft().getY()));
     }
 
     // Sprite
@@ -58,6 +66,7 @@ public class Paddle implements Sprite, Collidable {
                 this.paddle.getHeight()
         );
     }
+
     @Override
     public Velocity hit(Ball hitter, Point collisionPoint, Velocity currentVelocity) {
         if (collisionPoint == null) {
@@ -65,29 +74,41 @@ public class Paddle implements Sprite, Collidable {
         }
 
         double speed = currentVelocity.getSpeed();
+        double paddleLeftBound = paddle.getUpperLeft().getX();
+        double paddleRightBound = paddleLeftBound + paddle.getWidth();
+        double paddleTop = paddle.getUpperLeft().getY();
+        double paddleBottom = paddleTop + paddle.getHeight();
 
-        // First check if we hit the sides of the paddle
-        if (Common.thresholdComparison(collisionPoint.getX(), paddle.getUpperLeft().getX()) ||
-                Common.thresholdComparison(collisionPoint.getX(), (paddle.getLowerLine().end().getX()))) {
+        boolean hitLeft = Common.thresholdComparison(collisionPoint.getX(), paddleLeftBound);
+        boolean hitRight = Common.thresholdComparison(collisionPoint.getX(), paddleRightBound);
+
+        if ((hitLeft || hitRight) && collisionPoint.getY() >= paddleTop && collisionPoint.getY() <= paddleBottom) {
             return new Velocity(-currentVelocity.getDx(), currentVelocity.getDy());
         }
 
-        // For top hits, divide paddle into regions
-        double regionWidth = this.paddle.getWidth() / 5;
-        double hitPoint = collisionPoint.getX() - this.paddle.getUpperLeft().getX();
-        int region = (int) (hitPoint / regionWidth);
+        boolean hitTop = Common.thresholdComparison(collisionPoint.getY(), paddleTop)
+                && collisionPoint.getX() >= paddleLeftBound && collisionPoint.getX() <= paddleRightBound;
 
-        // Ensure region is within bounds
-        region = Math.max(0, Math.min(4, region));
-
-        // Define angles for each region (from left to right)
-        double[] angles = {300, 330, 0, 30, 60};
-
-        // For direct upward reflection in middle region
-        if (region == 2) {
-            return new Velocity(currentVelocity.getDx(), -Math.abs(currentVelocity.getDy()));
+        if (hitTop) {
+            // determine regions of contact -- divide paddle width into 5 regions,
+            // and then determine the angle of the hit and adjust the velocity accordingly.
+            double regionWidth = paddle.getWidth() / 5.0;
+            double hitPoint = collisionPoint.getX() - paddleLeftBound;
+            int region = (int) (hitPoint / regionWidth);
+            region = Math.max(0, Math.min(4, region));
+            double[] angles = {300, 330, 0, 30, 60};
+            if (region == 2) {
+                return new Velocity(currentVelocity.getDx(), -Math.abs(currentVelocity.getDy()));
+            }
+            return Velocity.fromAngleAndSpeed(angles[region], speed);
         }
-        return Velocity.fromAngleAndSpeed(angles[region], speed);
+
+        // handling case if ball is stuck in the paddle
+        boolean stuck = this.paddle.contains(new Point(collisionPoint.getX(), collisionPoint.getY()));
+        if (stuck) {
+            return new Velocity(currentVelocity.getDx(), currentVelocity.getDy());
+        }
+        return new Velocity(-currentVelocity.getDx(), -currentVelocity.getDy());
     }
 
     // Add this paddle to the game.

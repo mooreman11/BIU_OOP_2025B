@@ -68,6 +68,21 @@ public class Rectangle {
         this.upperLeft = p;
     }
 
+    /**
+     * Determines whether the specified point is contained within this rectangle.
+     * A point is considered inside the rectangle if its coordinates fall within
+     * the rectangle's boundaries (inclusive of the edges).
+     *
+     * @param point the point to test for containment
+     * @return true if the point is within or on the boundary of the rectangle, false otherwise
+     */
+    public boolean contains(Point point){
+        return point.getX() >= upperLeft.getX() &&
+                point.getX() <= upperLeft.getX() + width &&
+                point.getY() >= upperLeft.getY() + height &&
+                point.getY() <= upperLeft.getY();
+    }
+
     public java.util.List<Point> intersectionPoints(Line line){
         Line[] lines = {getUpperLine(), getLowerLine(), getLeftLine(), getRightLine()};
         java.util.List<Point> points = new java.util.ArrayList<>();
