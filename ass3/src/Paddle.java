@@ -4,8 +4,8 @@ import biuoop.KeyboardSensor;
 import java.awt.*;
 
 public class Paddle implements Sprite, Collidable {
-    private KeyboardSensor keyboard;
-    private Rectangle paddle;
+    private final KeyboardSensor keyboard;
+    private final Rectangle paddle;
     private final int GUI_WIDTH;
     private static final int STEP = 15;
 
@@ -66,11 +66,11 @@ public class Paddle implements Sprite, Collidable {
 
         double speed = currentVelocity.getSpeed();
 
-//        // First check if we hit the sides of the paddle
-//        if (Line1.equals(collisionPoint.getX(), paddle.getUpperLeft().getX()) ||
-//            Line1.equals(collisionPoint.getX(), (paddle.getLowerLine().end().getX()))) {
-//            return new Velocity(-currentVelocity.getDx(), currentVelocity.getDy());
-//        }
+        // First check if we hit the sides of the paddle
+        if (Common.thresholdComparison(collisionPoint.getX(), paddle.getUpperLeft().getX()) ||
+                Common.thresholdComparison(collisionPoint.getX(), (paddle.getLowerLine().end().getX()))) {
+            return new Velocity(-currentVelocity.getDx(), currentVelocity.getDy());
+        }
 
         // For top hits, divide paddle into regions
         double regionWidth = this.paddle.getWidth() / 5;

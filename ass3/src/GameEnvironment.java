@@ -1,21 +1,39 @@
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Manages all Collidable objects in the game.
+ * Handles collision detection and provides information about the closest collision
+ * along a given trajectory.
+ */
 public class GameEnvironment {
-    private List<Collidable> collidables;
+    private final List<Collidable> collidables;
 
+    /**
+     * Constructs a new GameEnvironment with an empty list of Collidable objects.
+     */
     public GameEnvironment() {
         this.collidables = new ArrayList<>();
     }
 
+    /**
+     * Adds a Collidable object to the environment.
+     *
+     * @param c the Collidable object to add
+     */
     public void addCollidable(Collidable c) {
         collidables.add(c);
     }
 
-    // Assume an object moving from line.start() to line.end().
-    // If this object will not collide with any of the collidables
-    // in this collection, return null. Else, return the information
-    // about the closest collision that is going to occur.
+    /**
+     * Determines the closest collision along a given trajectory.
+     * Checks all Collidable objects in the environment for intersections
+     * with the trajectory and returns the closest collision point, if any.
+     *
+     * @param trajectory the trajectory of the moving object
+     * @return a CollisionInfo object representing the closest collision,
+     *         or null if no collision is detected
+     */
     public CollisionInfo getClosestCollision(Line trajectory) {
         CollisionInfo closestCollision = null;
         double closestDistance = Double.MAX_VALUE;

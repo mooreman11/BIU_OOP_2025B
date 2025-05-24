@@ -1,6 +1,5 @@
 import biuoop.DrawSurface;
-
-import java.awt.*;
+import java.awt.Color;
 
 /**
  * The Rectangle class represents a rectangular shape in 2D space.
@@ -79,21 +78,6 @@ public class Rectangle {
             }
         }
         return points;
-    }
-
-    /**
-     * Determines whether the specified point is contained within this rectangle.
-     * A point is considered inside the rectangle if its coordinates fall within
-     * the rectangle's boundaries (inclusive of the edges).
-     *
-     * @param point the point to test for containment
-     * @return true if the point is within or on the boundary of the rectangle, false otherwise
-     */
-    public boolean contains(Point point){
-        return point.getX() >= upperLeft.getX() &&
-                point.getX() <= upperLeft.getX() + width &&
-                point.getY() >= upperLeft.getY() &&
-                point.getY() <= upperLeft.getY() + height;
     }
 
     /**
