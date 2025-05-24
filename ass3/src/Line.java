@@ -94,18 +94,6 @@ public class Line {
     }
 
     /**
-     * Determines if the given lines intersect each other to form a triangle.
-     *
-     * @param other1 the first line segment
-     * @param other2 the second line segment
-     * @return true if the lines form a triangle, false otherwise
-     */
-    public boolean formsTriangle(Line other1, Line other2) {
-        return this.isIntersecting(other1, other2) && other1.isIntersecting(this, other2)
-                && other2.isIntersecting(other1, this);
-    }
-
-    /**
      * Calculates the determinant of two line segments, used to determine if
      * they are parallel or if they intersect.
      *

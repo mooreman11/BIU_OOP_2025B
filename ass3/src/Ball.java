@@ -10,23 +10,7 @@ public class Ball implements Sprite {
     private final int r;
     private final java.awt.Color color;
     private Velocity velocity;
-    private GameEnvironment gameEnvironment;
-
-    /**
-     * Constructor to initialize a Ball with a specific center point, radius,
-     * color, and velocity.
-     *
-     * @param x     The x coordinate of the center point of the ball.
-     * @param y     The y coordinate of the center point of the ball.
-     * @param r     The radius of the ball.
-     * @param color The color of the ball.
-     */
-    public Ball(double x, double y, int r, java.awt.Color color) {
-        this.center = new Point(x, y);
-        this.r = r;
-        this.color = color;
-        this.velocity = new Velocity(0, 0);
-    }
+    private final GameEnvironment gameEnvironment;
 
     /**
      * Constructor to initialize a Ball with center, radius, color, velocity, 
@@ -134,17 +118,40 @@ public class Ball implements Sprite {
      * Adjusts the position of the ball to avoid "sticking" to objects upon collision.
      *
      * @param collisionPoint The point of collision.
-     * @param velocity       The velocity of the ball at the time of collision.
+     * @param collisionObject The object that was hit.
      * @return The adjusted position of the ball.
      */
-    public Point adjustPosition(Point collisionPoint, Velocity velocity) {
-        double adjustmentFactor = this.r + 0.1;
-        double adjustedX = collisionPoint.getX();
-        double adjustedY = collisionPoint.getY();
-        if (velocity.getDx() < 0) adjustedX += adjustmentFactor;
-        else if (velocity.getDx() > 0) adjustedX -= adjustmentFactor;
-        if (velocity.getDy() < 0) adjustedY += adjustmentFactor;
-        else if (velocity.getDy() > 0) adjustedY -= adjustmentFactor;
+    public Point adjustPosition(Point collisionPoint, Collidable collisionObject) {
+        double adjustmentDistance = 1.0; // Small distance to move away from collision
+
+        Rectangle rect = collisionObject.getCollisionRectangle();
+        double rectLeft = rect.getUpperLeft().getX();
+        double rectRight = rectLeft + rect.getWidth();
+        double rectTop = rect.getUpperLeft().getY();
+        double rectBottom = rectTop + rect.getHeight();
+
+        // Determine which side was hit and adjust accordingly
+        double distToLeft = Math.abs(collisionPoint.getX() - rectLeft);
+        double distToRight = Math.abs(collisionPoint.getX() - rectRight);
+        double distToTop = Math.abs(collisionPoint.getY() - rectTop);
+        double distToBottom = Math.abs(collisionPoint.getY() - rectBottom);
+
+        double minDist = Math.min(Math.min(distToLeft, distToRight), Math.min(distToTop, distToBottom));
+
+        double adjustedX = center.getX();
+        double adjustedY = center.getY();
+
+        // Adjust the position based on the side that was hit with consideration to the radius of the ball
+        if (minDist == distToLeft) {
+            adjustedX = rectLeft - this.r - adjustmentDistance;
+        } else if (minDist == distToRight) {
+            adjustedX = rectRight + this.r + adjustmentDistance;
+        } else if (minDist == distToTop) {
+            adjustedY = rectTop - this.r - adjustmentDistance;
+        } else if (minDist == distToBottom) {
+            adjustedY = rectBottom + this.r + adjustmentDistance;
+        }
+
         return new Point(adjustedX, adjustedY);
     }
 
@@ -154,11 +161,18 @@ public class Ball implements Sprite {
     public void moveOneStep() {
         Line trajectory = this.calculateTrajectory();
         CollisionInfo hit = this.gameEnvironment.getClosestCollision(trajectory);
+
         if (hit != null) {
+            // Get new velocity from the hit object
             Velocity newVelocity = hit.getCollisionObject().hit(this, hit.getCollisionPoint(), this.velocity);
-            this.center = this.adjustPosition(hit.getCollisionPoint(), this.velocity);
+
+            // Adjust position to prevent sticking
+            this.center = this.adjustPosition(hit.getCollisionPoint(), hit.getCollisionObject());
+
+            // Set the new velocity
             this.velocity = newVelocity;
         } else {
+            // No collision, move normally
             this.center = this.getVelocity().applyToPoint(this.center);
         }
     }

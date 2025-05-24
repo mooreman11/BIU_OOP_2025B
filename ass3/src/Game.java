@@ -15,28 +15,14 @@ public class Game {
     private final GUI gui;
     private final Sleeper sleeper;
 
-    // Constants for game configuration
-    private static final int GUI_WIDTH = 800;
-    private static final int GUI_HEIGHT = 600;
-    private static final Rectangle GUI_RECT = new Rectangle(new Point(0, 0), GUI_WIDTH, GUI_HEIGHT);
-    private static final int PADDLE_WIDTH = 100;
-    private static final int PADDLE_HEIGHT = 20;
-    private static final int BALL_RADIUS = 5;
-    private static final Velocity BALL_VELOCITY = new Velocity(10, -10);
-    private static final int BLOCK_WIDTH = 50;
-    private static final int BLOCK_HEIGHT = 25;
-    private static final int BLOCK_ROWS = 6;
-    private static final int BLOCK_COLUMNS = 14;
-    private static final int BOUND_WIDTH = 15;
-    private static final int BOUND_HEIGHT = 15;
-
     /**
      * Constructs a new Game instance and initializes the sprite collection, game environment, GUI, and sleeper.
      */
     public Game() {
         this.sprites = new SpriteCollection();
         this.environment = new GameEnvironment();
-        this.gui = new GUI("Arkanoid", (int) GUI_RECT.getWidth(), (int) GUI_RECT.getHeight());
+        this.gui = new GUI("Arkanoid", (int)
+                GameConstants.GUI_RECT.getWidth(), (int) GameConstants.GUI_RECT.getHeight());
         this.sleeper = new Sleeper();
     }
 
@@ -80,11 +66,12 @@ public class Game {
      * Initializes the blocks for the game, positioning them based on their row and column.
      */
     public void initializeBlocks() {
-        for (int row = 0; row < BLOCK_ROWS; row++) {
-            for (int column = 0; column < BLOCK_COLUMNS - row; column++) {
-                int x = 800 - ((column + 1) * BLOCK_WIDTH) - BOUND_WIDTH;
-                int y = 50 + row * BLOCK_HEIGHT;
-                Block block = new Block(new Point(x, y), BLOCK_WIDTH, BLOCK_HEIGHT, getColor(row));
+        for (int row = 0; row < GameConstants.BLOCK_ROWS; row++) {
+            for (int column = 0; column < GameConstants.BLOCK_COLUMNS - row; column++) {
+                int x = 800 - ((column + 1) * GameConstants.BLOCK_WIDTH) - GameConstants.BOUND_WIDTH;
+                int y = 50 + row * GameConstants.BLOCK_HEIGHT;
+                Block block = new Block(new Point(x, y),
+                        GameConstants.BLOCK_WIDTH, GameConstants.BLOCK_HEIGHT, getColor(row));
                 block.addToGame(this);
             }
         }
@@ -95,10 +82,12 @@ public class Game {
      */
     public void initializeBalls() {
         Point ballPosition = new Point(
-                GUI_RECT.getWidth() / 2,
-                GUI_RECT.getHeight() - PADDLE_HEIGHT - BOUND_WIDTH - BALL_RADIUS - 1
+                GameConstants.GUI_RECT.getWidth() / 2,
+                GameConstants.GUI_RECT.getHeight() - GameConstants.PADDLE_HEIGHT -
+                        GameConstants.BOUND_WIDTH - GameConstants.BALL_RADIUS - 1
         );
-        Ball ball = new Ball(ballPosition, BALL_RADIUS, Color.WHITE, BALL_VELOCITY, environment);
+        Ball ball = new Ball(ballPosition, GameConstants.BALL_RADIUS, Color.WHITE,
+                GameConstants.BALL_VELOCITY, environment);
         ball.addToGame(this);
     }
 
@@ -107,9 +96,10 @@ public class Game {
      */
     public void initializePaddle() {
         Rectangle paddleRect = new Rectangle(
-                new Point((GUI_RECT.getWidth() - PADDLE_WIDTH) / 2,
-                        GUI_RECT.getHeight() - PADDLE_HEIGHT - BOUND_WIDTH), PADDLE_WIDTH, PADDLE_HEIGHT);
-        Paddle paddle = new Paddle(paddleRect, gui.getKeyboardSensor(), (int) GUI_RECT.getWidth());
+                new Point((GameConstants.GUI_RECT.getWidth() - GameConstants.PADDLE_WIDTH) / 2,
+                        GameConstants.GUI_RECT.getHeight() - GameConstants.PADDLE_HEIGHT - GameConstants.BOUND_WIDTH),
+                GameConstants.PADDLE_WIDTH, GameConstants.PADDLE_HEIGHT);
+        Paddle paddle = new Paddle(paddleRect, gui.getKeyboardSensor());
         paddle.addToGame(this);
     }
 
@@ -117,12 +107,17 @@ public class Game {
      * Initializes the boundaries of the game, including the frame and background.
      */
     public void initializeBoundaries() {
-        Block background = new Block(new Point(0, 0), GUI_RECT.getWidth(), GUI_RECT.getHeight(), Color.BLUE);
-        Block upperBound = new Block(new Point(0, 0), GUI_RECT.getWidth(), BOUND_HEIGHT, Color.GRAY);
-        Block lowerBound = new Block(new Point(0, GUI_RECT.getHeight() - BOUND_WIDTH),
-                GUI_RECT.getWidth(), BOUND_HEIGHT, Color.GRAY);
-        Block leftBound = new Block(new Point(0, 0), BOUND_WIDTH, GUI_RECT.getHeight(), Color.GRAY);
-        Block rightBound = new Block(new Point(GUI_RECT.getWidth() - BOUND_WIDTH, 0), BOUND_WIDTH, GUI_RECT.getHeight(), Color.GRAY);
+        Block background = new Block(new Point(0, 0), GameConstants.GUI_RECT.getWidth(),
+                GameConstants.GUI_RECT.getHeight(), Color.BLUE);
+        Block upperBound = new Block(new Point(0, 0),
+                GameConstants.GUI_RECT.getWidth(), GameConstants.BOUND_HEIGHT, Color.GRAY);
+        Block lowerBound = new Block(new Point(0,
+                GameConstants.GUI_RECT.getHeight() - GameConstants.BOUND_WIDTH),
+                GameConstants.GUI_RECT.getWidth(), GameConstants.BOUND_HEIGHT, Color.GRAY);
+        Block leftBound = new Block(new Point(0, 0), GameConstants.BOUND_WIDTH,
+                GameConstants.GUI_RECT.getHeight(), Color.GRAY);
+        Block rightBound = new Block(new Point(GameConstants.GUI_RECT.getWidth() - GameConstants.BOUND_WIDTH, 0),
+                GameConstants.BOUND_WIDTH, GameConstants.GUI_RECT.getHeight(), Color.GRAY);
         sprites.addSprite(background);
         upperBound.addToGame(this);
         lowerBound.addToGame(this);

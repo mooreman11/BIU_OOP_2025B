@@ -7,7 +7,7 @@ public class Velocity {
     private final double dy;
 
     /**
-     * Creates a Velocity with given dx and dy.
+     * Creates a Velocity with a given dx and dy.
      * @param dx change in x direction
      * @param dy change in y direction
      */
@@ -40,22 +40,24 @@ public class Velocity {
     }
 
     /**
-     * Creates Velocity from angle (degrees) and speed.
+     * Creates Velocity from an angle (degrees) and speed.
+     * Angle 0 is up, 90 is right, 180 is down, 270 is left.
      * @param angle angle in degrees
      * @param speed speed magnitude
      * @return new Velocity object
      */
     public static Velocity fromAngleAndSpeed(double angle, double speed) {
-        angle = Math.toRadians(angle);
-        double dx = speed * Math.cos(angle);
-        double dy = speed * Math.sin(angle);
+        double convertedAngle = angle - 90;
+        double radians = Math.toRadians(convertedAngle);
+        double dx = speed * Math.cos(radians);
+        double dy = speed * Math.sin(radians);
         return new Velocity(dx, dy);
     }
 
     /**
      * @return the speed (magnitude) of the velocity vector
      */
-    public double getSpeed(){
+    public double getSpeed() {
         return Math.sqrt(dx * dx + dy * dy);
     }
 }

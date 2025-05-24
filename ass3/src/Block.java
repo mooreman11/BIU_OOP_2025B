@@ -89,7 +89,7 @@ public class Block implements Collidable, Sprite {
     }
 
     /**
-     * Adds the block to the game as both a collidable and a sprite.
+     * Adds the block to the game as both a Collidable and a sprite.
      *
      * @param g The game to which the block is added.
      */

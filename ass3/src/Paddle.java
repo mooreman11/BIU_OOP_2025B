@@ -6,29 +6,25 @@ import java.awt.*;
 public class Paddle implements Sprite, Collidable {
     private final KeyboardSensor keyboard;
     private final Rectangle paddle;
-    private final int GUI_WIDTH;
-    private static final int STEP = 15;
 
-    Paddle(Rectangle paddle, KeyboardSensor keyboard, int GUI_WIDTH) {
+    Paddle(Rectangle paddle, KeyboardSensor keyboard) {
         this.paddle = paddle;
         this.keyboard = keyboard;
-        this.GUI_WIDTH = GUI_WIDTH;
     }
 
     public void moveLeft() {
         double currentX = paddle.getUpperLeft().getX();
-        double newX = currentX - STEP;
-        double leftBound = 15;
-        if (newX < leftBound) {
-            newX = leftBound;
+        double newX = currentX - GameConstants.STEP;
+        if (newX < GameConstants.BOUND_WIDTH) {
+            newX = GameConstants.BOUND_WIDTH;
         }
         paddle.setUpperLeft(new Point(newX, paddle.getUpperLeft().getY()));
     }
 
     public void moveRight() {
         double currentX = paddle.getUpperLeft().getX();
-        double newX = currentX + STEP;
-        double rightBound = GUI_WIDTH - 15 - paddle.getWidth();
+        double newX = currentX + GameConstants.STEP;
+        double rightBound = GameConstants.GUI_WIDTH - GameConstants.BOUND_WIDTH - paddle.getWidth();
         if (newX > rightBound) {
             newX = rightBound;
         }
@@ -96,17 +92,16 @@ public class Paddle implements Sprite, Collidable {
             double hitPoint = collisionPoint.getX() - paddleLeftBound;
             int region = (int) (hitPoint / regionWidth);
             region = Math.max(0, Math.min(4, region));
-            double[] angles = {300, 330, 0, 30, 60};
             if (region == 2) {
                 return new Velocity(currentVelocity.getDx(), -Math.abs(currentVelocity.getDy()));
             }
-            return Velocity.fromAngleAndSpeed(angles[region], speed);
+            return Velocity.fromAngleAndSpeed(GameConstants.angles[region], speed);
         }
 
-        // handling case if ball is stuck in the paddle
+        // handling case if a ball is stuck in the paddle
         boolean stuck = this.paddle.contains(new Point(collisionPoint.getX(), collisionPoint.getY()));
         if (stuck) {
-            return new Velocity(currentVelocity.getDx(), currentVelocity.getDy());
+            return new Velocity(currentVelocity.getDx(), -currentVelocity.getDy());
         }
         return new Velocity(-currentVelocity.getDx(), -currentVelocity.getDy());
     }
